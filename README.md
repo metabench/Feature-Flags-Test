@@ -41,4 +41,6 @@ Clone this repository and make your commits to that (removing origin and making 
 
 This exercise should not take more than 3 hours.
 
+Ideally we'd like to see a plan, any assumptions, implementation code, and your thoughts on what you would do better / add given more time.
+
 If you have any questions you can email shaun@fantastec.io
