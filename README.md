@@ -7,7 +7,9 @@ Your task is to create a simple feature flag API. A feature flag is, according t
 Source:
 https://en.wikipedia.org/wiki/Feature_toggle
 
-For this task, we want to create feature flag to allow us to conduct an A/B test. Each flag document has:
+> Additionally, a feature toggle may be used to perform A/B testing on users in a controlled experimental fashion.  For example, to test hwther a particular colour scheme is more likely to get a user's attention, we may setup a feature flag with a ratio of 50:50, where 50% of users see a red background, whilst 50% see a blue background.
+
+For this task, we want to create feature flags to allow us to conduct an A/B test. Each flag document has:
 
 ```
 {
@@ -19,16 +21,13 @@ For this task, we want to create feature flag to allow us to conduct an A/B test
 }
 ```
 
-Each user has the following information:
+Each user the API will be presented with the user's `email` and `location`, for example:
 
 ```
-{
-    "email":"foo@bar.com",
-    "location":"GB"
-}
+email=foo@bar.com&location=GB
 ```
 
-Given the list of feature flags in `features.json` , your task is to create an API endpoint that returns a list of the features that are enabled for a given user’s email and location. **The feature flags returned by the API for a given user must always be consistent**. A list of example users are included in `example_users.json`.
+Given the list of feature flags in `features.json` , your task is to create an API endpoint that returns a list of the features that are enabled for a given user’s email and location. **The feature flags returned by the API for a given user must always be consistent**. A list of example users are included in `example_users.json`, but these are not exhaustive as the API should process any combination of email and location given to it.
 
 
 You can use any frameworks/libraries you like. Be sure to include tests and instructions on how to run the project.
