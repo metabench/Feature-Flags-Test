@@ -1,0 +1,19 @@
+{
+    "name": "feature-flag",
+    "main": "feature_flag.js",
+    "license": "MIT",
+    "dependencies": {
+        "lang-mini": "^0.0.26"
+    },
+    "engines": {
+        "node": ">=15.0.0"
+    },
+    "description": "Feature Flag Test",
+    "author": "James Vickers <james@metabench.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/metabench/feature-flag.git"
+    },
+    "version": "0.0.1",
+    "private": true
+}
