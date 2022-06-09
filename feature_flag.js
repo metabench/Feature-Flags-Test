@@ -29,7 +29,7 @@ const load_users = async (filepath) => {
             const o_user = {
                 email, location
             }
-            console.log('o_user', o_user);
+            //console.log('o_user', o_user);
             if (map_users.has(email)) {
 
             } else {
@@ -53,7 +53,7 @@ const load_features = async (filepath) => {
 
     each(l_features, feature => {
         const {name, ratio, enabledEmails, includedCountries, excludedCountries} = feature;
-        console.log('feature', feature);
+        //console.log('feature', feature);
 
         if (map_features.has(name)) {
             throw 'Feature name ' + name + ' already exists';
@@ -86,11 +86,35 @@ const load_features = async (filepath) => {
     });
 }
 
+const calc_chance_ratio = (email, feature_name) => {
+    //const str_seed_key = o_user.email + '|' + value.name;
+    const str_seed_key = email + '|' + feature_name;
+    //console.log('str_seed_key', str_seed_key);
+
+    const hash = createHash('sha256');
+
+    hash.update(str_seed_key);
+    //console.log('hex digest ' + hash.digest('hex'));
+
+    const hdigest = hash.digest('hex');
+    const minidigest = hdigest.substring(0, 4);
+    //console.log('minidigest', minidigest);
+
+    const bmdigest = Buffer.from(minidigest, 'hex');
+
+    //console.log('bmdigest', bmdigest);
+
+    const ui16_mini_digest = bmdigest.readUint16LE(0);
+    //console.log('ui16_mini_digest', ui16_mini_digest);
+    const proportion = ui16_mini_digest / (255 * 256);
+    return proportion;
+}
+
 const get_user_location_features = (username, location) => {
     // get the user from the username (email)
 
     const o_user = map_users.get(username);
-    console.log('o_user', o_user);
+    //console.log('o_user', o_user);
 
     // then lookup features that are enabled for that user...
 
@@ -101,35 +125,18 @@ const get_user_location_features = (username, location) => {
     let map_res = new Map();
     // and a map for the result, to prevent duplicate entries
 
-    if (o_user) {
-        // get the map of the user's enabled features
-        //   (disabled features)
-        if (o_user.map_enabled_features) {
-            const user_enabled_feaures = o_user.map_enabled_features.keys();
-            console.log('user_enabled_feaures', user_enabled_feaures);
-
-            // var arr = Array.from(map.entries());
-            for (const featureName of user_enabled_feaures) {
-                // Any Code Here
-                map_res.set(featureName, true);
-            }
-
-            //user_enabled_feaures.
-        }
-
-        // then for the other features...
-
+    const iterate_features = () => {
         map_features.forEach((value, key) => {
             // is that feature either enabled or disabled in that location?
 
-            console.log('value', value);
+            //console.log('value', value);
             const {includedCountries, map_included_countries, excludedCountries, map_excluded_countries} = value;
-            console.log('map_included_countries', map_included_countries);
-            console.log('map_excluded_countries', map_excluded_countries);
+            //console.log('map_included_countries', map_included_countries);
+            //console.log('map_excluded_countries', map_excluded_countries);
 
             // List of countries the user must be from, if empty it is enabled for all countries
 
-            console.log('location', location);
+            //console.log('location', location);
 
             if (map_excluded_countries.has(location)) {
 
@@ -141,6 +148,8 @@ const get_user_location_features = (username, location) => {
                         // get the seed key for the user and feature
                         const str_seed_key = o_user.email + '|' + value.name;
                         console.log('str_seed_key', str_seed_key);
+
+                        throw 'NYI';
 
                         
 
@@ -162,30 +171,11 @@ const get_user_location_features = (username, location) => {
                 } else {
                     // add it according to chance
 
-                    const str_seed_key = o_user.email + '|' + value.name;
-                    console.log('str_seed_key', str_seed_key);
+                    // needs an o_user.
+                    //  without such an o_user...?
 
-                    const hash = createHash('sha256');
-
-                    hash.update(str_seed_key);
-                    //console.log('hex digest ' + hash.digest('hex'));
-
-                    const hdigest = hash.digest('hex');
-                    const minidigest = hdigest.substring(0, 4);
-                    console.log('minidigest', minidigest);
-
-                    const bmdigest = Buffer.from(minidigest, 'hex');
-
-                    console.log('bmdigest', bmdigest);
-
-                    const ui16_mini_digest = bmdigest.readUint16LE(0);
-                    console.log('ui16_mini_digest', ui16_mini_digest);
-
-                    const proportion = ui16_mini_digest / (255 * 256);
-                    console.log('proportion', proportion);
-                    console.log('value.ratio', value.ratio);
-
-                    // then is the proportion <= the ratio?
+                    
+                    const proportion = calc_chance_ratio(username, value.name);
 
                     if (proportion <= value.ratio) {
                         map_res.set(value.name, true);
@@ -195,11 +185,39 @@ const get_user_location_features = (username, location) => {
             }
 
         })
+    }
+
+    if (o_user) {
+        // get the map of the user's enabled features
+        //   (disabled features)
+        if (o_user.map_enabled_features) {
+            const user_enabled_feaures = o_user.map_enabled_features.keys();
+            //console.log('user_enabled_feaures', user_enabled_feaures);
+
+            // var arr = Array.from(map.entries());
+            for (const featureName of user_enabled_feaures) {
+                // Any Code Here
+                map_res.set(featureName, true);
+            }
+
+            iterate_features();
+
+            //user_enabled_feaures.
+        }
+
+        // then for the other features...
+
+        
 
 
 
     } else {
-        throw 'NYI';
+
+        // Generic user (with location)
+
+        iterate_features();
+
+        //throw 'NYI';
     }
 
     return Array.from(map_res.keys());
@@ -216,8 +234,8 @@ if (require.main === module) {
     const o_users = require('./example_users.json');
     const o_features = require('./features.json');
 
-    console.log('o_users', o_users);
-    console.log('o_features', o_features);
+    //console.log('o_users', o_users);
+    //console.log('o_features', o_features);
 
     const path_users = './example_users.json';
     const path_features = './features.json';
@@ -227,12 +245,16 @@ if (require.main === module) {
         await load_features(path_features);
 
         //let res = get_user_location_features('fred@example.com', 'GB');
-        let res = get_user_location_features('sam@example.com', 'FR');
 
-        // "email=sam@example.com&location=FR"
+        const try_user_location = (username, location) => {
+            let res = get_user_location_features(username, location);
+            // "email=sam@example.com&location=FR"
+            console.log('res', res);
+        }
 
+        try_user_location('sam2@example.com', 'FR');
 
-        console.log('res', res);
+        
     })();
 
     //console.log('called directly');
