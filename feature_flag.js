@@ -261,3 +261,10 @@ if (require.main === module) {
 } else {
     //console.log('required as a module');
 }
+
+module.exports = {
+    load_users,
+    load_features,
+    get_user_location_features,
+    calc_chance_ratio
+}
